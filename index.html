@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quro Agency | Live Terminal</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+         :root {
+            --neon: #00ff88;
+            --dark: #050505;
+            --gray: #1a1a1a;
+        }
+        
+        body {
+            background: var(--dark);
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            flex-grow: 1;
+        }
+        
+        .card {
+            background: var(--gray);
+            border: 1px solid #333;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .neon-text {
+            color: var(--neon);
+            text-shadow: 0 0 5px var(--neon);
+        }
+        
+        .withdrawal-list {
+            height: 250px;
+            overflow: hidden;
+            font-size: 0.8rem;
+        }
+        
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #222;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+        
+        .cta-link {
+            color: var(--neon);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .slogan {
+            display: block;
+            margin-top: 10px;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header style="border-bottom: 2px solid var(--neon); padding-bottom: 10px; margin-bottom: 30px;">
+        <h1 style="margin: 0;">TERMINAL OPERATIVA <span class="neon-text">QURO V.0.1</span></h1>
+        <p style="font-size: 0.7rem; color: #888;">STATUS: SISTEMA DE ARBITRAJE EN LÍNEA | NODOS ACTIVOS: 1.248</p>
+    </header>
+
+    <div class="grid">
+        <!-- Gráfica -->
+        <div class="card">
+            <h3 class="neon-text">Flujo de Arbitraje (Global)</h3>
+            <canvas id="graficaRendimiento"></canvas>
+        </div>
+
+        <!-- Retiros -->
+        <div class="card">
+            <h3 class="neon-text">Últimos Retiros de Capital</h3>
+            <div id="listaRetiros" class="withdrawal-list"></div>
+        </div>
+
+        <!-- Referencias Dinámicas -->
+        <div class="card" id="ref-card">
+            <h3 class="neon-text">Referencias de Inversores</h3>
+            <div id="ref-content">
+                <p style="font-size: 0.8rem; font-style: italic;">"Cargando testimonios del servidor..."</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>empeza a generar hoy con quro sin mover un dedo, <a href="https://quroagency.com/" class="cta-link">https://quroagency.com/</a></p>
+        <span class="slogan">quro, te cambia la vida</span>
+    </footer>
+
+    <script>
+        // --- CONFIGURACIÓN DE DATOS ---
+        const nombresNodos = [
+            "Alpha", "Beta", "Sigma", "Delta", "Quantum", "Core", "Nexus", "Titan", "Astro", "Zion",
+            "Vertex", "Pulse", "Omega", "Flux", "Zenith", "Hyper", "Cyber", "Aura", "Prime", "Void",
+            "Gravity", "Matrix", "Orbit", "Plasma", "Sonic", "Vector", "Ghost", "Neon", "Shadow", "Logic"
+        ];
+
+        const testimonios = [{
+            text: "El nodo Pro me permitió escalar mi liquidez en tiempo récord.",
+            user: "#8821"
+        }, {
+            text: "Transparencia total en el dashboard, los retiros llegan siempre a tiempo.",
+            user: "#9012"
+        }, {
+            text: "Increíble la estabilidad del arbitraje este mes. Muy conforme.",
+            user: "#4432"
+        }, {
+            text: "Empecé con el presupuesto mínimo y ya estoy reinvirtiendo en un nodo Nexus.",
+            user: "#1129"
+        }, {
+            text: "Soporte técnico 10/10. Me ayudaron a configurar mi flujo de trabajo.",
+            user: "#7765"
+        }];
+
+        // --- GRÁFICA ---
+        const ctx = document.getElementById('graficaRendimiento').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00'],
+                datasets: [{
+                    label: 'Volumen',
+                    data: [12, 19, 15, 25, 22, 30],
+                    borderColor: '#00ff88',
+                    tension: 0.4,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        display: false
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // --- GENERADOR DE RETIROS (CADA 4 SEG) ---
+        function actualizarRetiros() {
+            const container = document.getElementById('listaRetiros');
+            const nodoRandom = nombresNodos[Math.floor(Math.random() * nombresNodos.length)];
+            const montoRandom = Math.floor(Math.random() * (25000000 - 100000 + 1)) + 100000;
+            const statusOptions = ["EXITOSO", "PROCESADO", "COMPLETADO"];
+
+            const div = document.createElement('div');
+            div.className = 'log-entry';
+            div.innerHTML = `> NODO: ${nodoRandom} | Retiro: <span class="neon-text">$${montoRandom.toLocaleString()}</span> | ${statusOptions[Math.floor(Math.random()*3)]}`;
+
+            container.prepend(div);
+            if (container.childNodes.length > 8) container.removeChild(container.lastChild);
+        }
+
+        // --- GENERADOR DE REFERENCIAS (CADA 6 SEG) ---
+        function rotarReferencias() {
+            const refContent = document.getElementById('ref-content');
+            const ref = testimonios[Math.floor(Math.random() * testimonios.length)];
+
+            refContent.style.opacity = 0;
+            setTimeout(() => {
+                refContent.innerHTML = `
+                    <p style="font-size: 0.8rem; font-style: italic;">"${ref.text}"</p>
+                    <small>- Inversor ID: ${ref.user}</small>
+                    <hr style="border: 0; border-top: 1px solid #333; margin: 15px 0;">
+                    <p style="font-size: 0.7rem; color: #00ff88;">Nodo activo detectado: ${nombresNodos[Math.floor(Math.random()*30)]}</p>
+                `;
+                refContent.style.opacity = 1;
+            }, 500);
+        }
+
+        setInterval(actualizarRetiros, 4000);
+        setInterval(rotarReferencias, 6000);
+        rotarReferencias(); // Carga inicial
+        actualizarRetiros(); // Carga inicial
+    </script>
+</body>
+
+</html>
